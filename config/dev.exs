@@ -26,7 +26,8 @@ config :tic_tac_toe, TicTacToeWeb.Endpoint,
   secret_key_base: "2gOp48s5hyz7iE1MVB7H7+k81pB/VBpamnozSGER1zM23kiXbsEpTYd0cey/Bwsm",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 
 # ## SSL Support

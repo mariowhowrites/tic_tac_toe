@@ -1,0 +1,40 @@
+<h1 class="my-8 text-2xl">Show Match</h1>
+
+<%= if @live_action in [:edit] do %>
+  <.modal return_to={Routes.match_show_path(@socket, :show, @match)}>
+    <.live_component
+      module={TicTacToeWeb.MatchLive.FormComponent}
+      id={@match.id}
+      title={@page_title}
+      action={@live_action}
+      match={@match}
+      return_to={Routes.match_show_path(@socket, :show, @match)}
+    />
+  </.modal>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Creator:</strong>
+    <%= @match.creator %>
+  </li>
+
+  <li>
+    <strong>Challenger:</strong>
+    <%= @match.challenger %>
+  </li>
+
+</ul>
+
+<span><%= get_status_text(@match) %></span>
+
+<.live_component 
+  module={TicTacToeWeb.MatchLive.Board} 
+  id={@match.id} 
+  match={@match} 
+  user_uuid={@user_uuid}
+/>
+
+<span><%= live_patch "Edit", to: Routes.match_show_path(@socket, :edit, @match), class: "button" %></span> |
+<span><%= live_redirect "Back", to: Routes.match_index_path(@socket, :index) %></span>

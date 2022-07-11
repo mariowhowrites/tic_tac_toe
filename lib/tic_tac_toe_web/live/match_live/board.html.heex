@@ -1,0 +1,14 @@
+<section class="flex justify-center items-center my-12">
+  <div id="board" class="grid grid-rows-3 grid-cols-3">
+    <%= for index <- 1..9 do %>
+        <div 
+          class="border border-black flex items-center justify-center h-12 w-12 cursor-pointer" 
+          phx-click="update_game_value"
+          phx-value-index={index}
+          phx-target={@myself}
+        >
+          <span><%= get_square_value(@match, index) %></span>
+        </div>
+    <% end %>
+  </div>
+</section>

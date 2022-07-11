@@ -8,18 +8,35 @@ defmodule TicTacToeWeb.Router do
     plug :put_root_layout, {TicTacToeWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  defp fetch_current_user(conn, _) do
+    if user_uuid = get_session(conn, :user_uuid) do
+      assign(conn, :user_uuid, user_uuid)
+    else
+      new_uuid = Ecto.UUID.generate()
+
+
+      conn |> assign(:user_uuid, new_uuid) |> put_session(:user_uuid, new_uuid)
+    end
+  end
   scope "/", TicTacToeWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
-    get "/hello", HelloController, :index
+    live "/", MatchLive.Index, :index
+    live "/new", MatchLive.Index, :new
+    live "/:id/edit", MatchLive.Index, :edit
+
+    live "/:id", MatchLive.Show, :show
+    live "/:id/show/edit", MatchLive.Show, :edit
   end
+
+
 
   # Other scopes may use custom stacks.
   # scope "/api", TicTacToeWeb do
