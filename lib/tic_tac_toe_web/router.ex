@@ -20,11 +20,11 @@ defmodule TicTacToeWeb.Router do
       assign(conn, :user_uuid, user_uuid)
     else
       new_uuid = Ecto.UUID.generate()
-
-
+      
       conn |> assign(:user_uuid, new_uuid) |> put_session(:user_uuid, new_uuid)
     end
   end
+
   scope "/", TicTacToeWeb do
     pipe_through :browser
 

@@ -2,24 +2,23 @@ defmodule TicTacToeWeb.MatchLive.Index do
   use TicTacToeWeb, :live_view
 
   alias TicTacToe.Multiplayer
-  alias Phoenix.PubSub
 
   @impl true
   def mount(_params, session, socket) do
     if connected?(socket) do
-      PubSub.subscribe(TicTacToe.PubSub, "all_matches")
+      Multiplayer.Match.subscribe_matches()
     end
 
-    {:ok,
+    {
+      :ok,
      socket
      |> assign(:matches, list_matches())
-     |> assign(:user_uuid, Map.get(session, "user_uuid"))}
+     |> assign(:user_uuid, Map.get(session, "user_uuid"))
+    }
   end
 
   @impl true
-  def handle_info(message, socket) do
-    IO.inspect(message)
-
+  def handle_info(:matches, socket) do
     {
       :noreply,
       socket
@@ -29,7 +28,10 @@ defmodule TicTacToeWeb.MatchLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    {:noreply, apply_patch(socket, socket.assigns.live_action, params)}
+    {
+      :noreply,
+      apply_patch(socket, socket.assigns.live_action, params)
+    }
   end
 
   defp apply_patch(socket, :new, _params) do
@@ -66,7 +68,7 @@ defmodule TicTacToeWeb.MatchLive.Index do
   end
 
   defp list_matches do
-    Multiplayer.list_matches()
+    Multiplayer.list_non_completed_matches()
   end
 
   defp display_name(:creator, match, user_uuid) do

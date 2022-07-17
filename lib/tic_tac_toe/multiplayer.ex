@@ -5,8 +5,6 @@ defmodule TicTacToe.Multiplayer do
 
   import Ecto.Query, warn: false
   alias TicTacToe.Repo
-  alias Phoenix.PubSub
-
   alias TicTacToe.Multiplayer.Match
   alias TicTacToe.Multiplayer.Engine
 
@@ -20,7 +18,16 @@ defmodule TicTacToe.Multiplayer do
 
   """
   def list_matches do
-    Repo.all(Match)
+    Repo.all(Match |> order_by(desc: :inserted_at))
+  end
+
+  # List all matches that are not yet completed. IE: where the match status is not `draw`, `creator_win`, or `challenger_win`.
+  def list_non_completed_matches do
+    matches = list_matches()
+
+    Enum.filter(matches, fn match ->
+      Engine.match_status(match) not in [:challenger_win, :creator_win, :draw]
+    end)
   end
 
   @doc """
@@ -45,6 +52,10 @@ defmodule TicTacToe.Multiplayer do
 
   def is_match_challenger?(match, user_uuid) do
     match.challenger === user_uuid
+  end
+
+  def is_match_open?(match) do
+    match.challenger === nil
   end
 
   @doc """
@@ -92,7 +103,7 @@ defmodule TicTacToe.Multiplayer do
     new_match =
       case update_match(
              match,
-             %{match_state: Engine.update_match_state(match.match_state, role, index)}
+             %{match_state: Engine.update_match_state(match, role, index)}
            ) do
         {:ok, new_match} -> new_match
         {:error, _} -> match
@@ -103,8 +114,20 @@ defmodule TicTacToe.Multiplayer do
     new_match
   end
 
+  def get_status_text(%Match{} = match) do
+    case Engine.match_status(match) do
+      :open -> "Open"
+      :accepted -> "Accepted"
+      :challenger_win -> "Challenger Wins"
+      :creator_win -> "Creator Wins"
+      :challenger_turn -> "Challenger Turn"
+      :creator_turn -> "Creator Turn"
+      :draw -> "Tie"
+    end
+  end
+
   def add_match_challenger(%Match{} = match, user_uuid) do
-    match = update_match(
+    {:ok, match} = update_match(
       match,
       %{challenger: user_uuid}
     )
@@ -112,7 +135,7 @@ defmodule TicTacToe.Multiplayer do
     Match.broadcast_matches()
     Match.broadcast_match(match.id)
 
-    match
+    {:ok, match}
   end
 
   @doc """
@@ -142,101 +165,5 @@ defmodule TicTacToe.Multiplayer do
   """
   def change_match(%Match{} = match, attrs \\ %{}) do
     Match.changeset(match, attrs)
-  end
-
-  alias TicTacToe.Multiplayer.Player
-
-  @doc """
-  Returns the list of players.
-
-  ## Examples
-
-      iex> list_players()
-      [%Player{}, ...]
-
-  """
-  def list_players do
-    Repo.all(Player)
-  end
-
-  @doc """
-  Gets a single player.
-
-  Raises `Ecto.NoResultsError` if the Player does not exist.
-
-  ## Examples
-
-      iex> get_player!(123)
-      %Player{}
-
-      iex> get_player!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_player!(id), do: Repo.get!(Player, id)
-
-  @doc """
-  Creates a player.
-
-  ## Examples
-
-      iex> create_player(%{field: value})
-      {:ok, %Player{}}
-
-      iex> create_player(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_player(attrs \\ %{}) do
-    %Player{}
-    |> Player.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a player.
-
-  ## Examples
-
-      iex> update_player(player, %{field: new_value})
-      {:ok, %Player{}}
-
-      iex> update_player(player, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_player(%Player{} = player, attrs) do
-    player
-    |> Player.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a player.
-
-  ## Examples
-
-      iex> delete_player(player)
-      {:ok, %Player{}}
-
-      iex> delete_player(player)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_player(%Player{} = player) do
-    Repo.delete(player)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking player changes.
-
-  ## Examples
-
-      iex> change_player(player)
-      %Ecto.Changeset{data: %Player{}}
-
-  """
-  def change_player(%Player{} = player, attrs \\ %{}) do
-    Player.changeset(player, attrs)
   end
 end

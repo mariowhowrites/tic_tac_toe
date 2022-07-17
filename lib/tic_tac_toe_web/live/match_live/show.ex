@@ -38,14 +38,4 @@ defmodule TicTacToeWeb.MatchLive.Show do
 
   defp page_title(:show), do: "Show Match"
   defp page_title(:edit), do: "Edit Match"
-
-  defp get_status_text(match) do
-    case Multiplayer.Engine.match_status(match.match_state) do
-      :challenger_win -> "Challenger Wins"
-      :creator_win -> "Creator Wins"
-      :challenger_turn -> "Challenger Turn"
-      :creator_turn -> "Creator Turn"
-      :draw -> "Tie"
-    end
-  end
 end
