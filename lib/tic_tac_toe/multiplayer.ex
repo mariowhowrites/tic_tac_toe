@@ -18,7 +18,7 @@ defmodule TicTacToe.Multiplayer do
 
   """
   def list_matches do
-    Repo.all(Match |> order_by(desc: :inserted_at))
+    Repo.all(Match |> order_by(desc: :inserted_at) |> preload([:creator, :challenger]))
   end
 
   # List all matches that are not yet completed. IE: where the match status is not `draw`, `creator_win`, or `challenger_win`.
@@ -44,14 +44,14 @@ defmodule TicTacToe.Multiplayer do
       ** (Ecto.NoResultsError)
 
   """
-  def get_match!(id), do: Repo.get!(Match, id)
+  def get_match!(id), do: Repo.get!(Match, id) |> Repo.preload([:creator, :challenger])
 
-  def is_match_creator?(match, user_uuid) do
-    match.creator === user_uuid
+  def is_match_creator?(match, user) do
+    match.creator === user
   end
 
-  def is_match_challenger?(match, user_uuid) do
-    match.challenger === user_uuid
+  def is_match_challenger?(match, user) do
+    match.challenger === user
   end
 
   def is_match_open?(match) do
@@ -100,6 +100,8 @@ defmodule TicTacToe.Multiplayer do
   end
 
   def update_match_state(%Match{} = match, role, index) do
+    IO.inspect {match, role, index}
+
     new_match =
       case update_match(
              match,
@@ -108,6 +110,7 @@ defmodule TicTacToe.Multiplayer do
         {:ok, new_match} -> new_match
         {:error, _} -> match
       end
+
 
     Match.broadcast_match(new_match.id)
 
@@ -126,13 +129,17 @@ defmodule TicTacToe.Multiplayer do
     end
   end
 
-  def add_match_challenger(%Match{} = match, user_uuid) do
-    {:ok, match} = update_match(
-      match,
-      %{challenger: user_uuid}
-    )
+  def add_match_challenger(%Match{} = match, user) do
+    {:ok, match} = Repo.get(Match, match.id)
+    |> Repo.preload([:creator, :challenger])
+    |> Match.changeset(%{challenger: user})
+    |> Repo.update()
 
     Match.broadcast_matches()
+
+    IO.inspect("lol")
+    IO.inspect(match)
+
     Match.broadcast_match(match.id)
 
     {:ok, match}
@@ -165,5 +172,20 @@ defmodule TicTacToe.Multiplayer do
   """
   def change_match(%Match{} = match, attrs \\ %{}) do
     Match.changeset(match, attrs)
+  end
+
+  def display_name(:creator, match, user) do
+    case is_match_creator?(match, user) do
+      true -> "You"
+      false -> match.creator.email
+    end
+  end
+
+  def display_name(:challenger, match, user) do
+    case match.challenger do
+      nil -> "Nobody... yet"
+      ^user -> "You"
+      _default -> match.challenger.email
+    end
   end
 end

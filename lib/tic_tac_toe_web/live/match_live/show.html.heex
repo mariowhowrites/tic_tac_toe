@@ -17,12 +17,12 @@
 
   <li>
     <strong>Creator:</strong>
-    <%= @match.creator %>
+    <%= Multiplayer.display_name(:creator, @match, @user) %>
   </li>
 
   <li>
     <strong>Challenger:</strong>
-    <%= @match.challenger %>
+    <%= Multiplayer.display_name(:challenger, @match, @user) %>
   </li>
 
 </ul>
@@ -33,7 +33,7 @@
   module={TicTacToeWeb.MatchLive.Board} 
   id={@match.id} 
   match={@match} 
-  user_uuid={@user_uuid}
+  user={@user}
 />
 
 <span><%= live_patch "Edit", to: Routes.match_show_path(@socket, :edit, @match), class: "button" %></span> |

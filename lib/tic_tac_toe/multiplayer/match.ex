@@ -2,19 +2,18 @@ defmodule TicTacToe.Multiplayer.Match do
   use Ecto.Schema
   import Ecto.Changeset
   alias Phoenix.PubSub
-
+  alias TicTacToe.Accounts.User
 
   @pubsub TicTacToe.PubSub
 
   schema "matches" do
-    field :challenger, Ecto.UUID
-    field :creator, Ecto.UUID
-
     field :match_state, :map, default: TicTacToe.Multiplayer.Engine.new_match_state()
+
+    belongs_to :creator, User
+    belongs_to :challenger, User
 
     timestamps()
   end
-
 
 
   @doc """
@@ -37,10 +36,19 @@ defmodule TicTacToe.Multiplayer.Match do
     PubSub.broadcast(@pubsub, "match:#{match_id}", {:match, match_id})
   end
 
+  defp maybe_add_creator_or_challenger(match, attrs) do
+    cond do
+      Map.has_key?(attrs, :challenger) -> put_assoc(match, :challenger, attrs.challenger)
+      Map.has_key?(attrs, :creator) -> put_assoc(match, :creator, attrs.creator)
+      true -> match
+    end
+  end
+
   @doc false
   def changeset(match, attrs) do
     match
-    |> cast(attrs, [:creator, :challenger, :match_state])
-    |> validate_required([:creator, :match_state])
+    |> cast(attrs, [:match_state])
+    |> maybe_add_creator_or_challenger(attrs)
+    |> validate_required([:match_state, :creator])
   end
 end

@@ -9,7 +9,7 @@ defmodule TicTacToeWeb.MatchLive.Show do
       Multiplayer.Match.subscribe_match(id)
     end
 
-    {:ok, socket |> assign(:user_uuid, Map.get(session, "user_uuid"))}
+    {:ok, socket |> assign(:user, Map.get(session, "current_user"))}
   end
 
   @impl true

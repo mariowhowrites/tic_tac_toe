@@ -13,7 +13,7 @@ defmodule TicTacToeWeb.MatchLive.Index do
       :ok,
      socket
      |> assign(:matches, list_matches())
-     |> assign(:user_uuid, Map.get(session, "user_uuid"))
+     |> assign(:user, Map.get(session, "current_user"))
     }
   end
 
@@ -35,7 +35,7 @@ defmodule TicTacToeWeb.MatchLive.Index do
   end
 
   defp apply_patch(socket, :new, _params) do
-    {:ok, new_match} = Multiplayer.create_match(%{creator: socket.assigns.user_uuid})
+    {:ok, new_match} = Multiplayer.create_match(%{creator: socket.assigns.user})
 
     push_redirect(
       socket,
@@ -59,7 +59,7 @@ defmodule TicTacToeWeb.MatchLive.Index do
 
   def handle_event("accept", %{"id" => id}, socket) do
     match = Multiplayer.get_match!(id)
-    {:ok, match} = Multiplayer.add_match_challenger(match, socket.assigns.user_uuid)
+    {:ok, match} = Multiplayer.add_match_challenger(match, socket.assigns.user)
 
     {:noreply,
       socket
@@ -69,20 +69,5 @@ defmodule TicTacToeWeb.MatchLive.Index do
 
   defp list_matches do
     Multiplayer.list_non_completed_matches()
-  end
-
-  defp display_name(:creator, match, user_uuid) do
-    case Multiplayer.is_match_creator?(match, user_uuid) do
-      true -> "You"
-      false -> String.slice(match.creator, 0..5)
-    end
-  end
-
-  defp display_name(:challenger, match, user_uuid) do
-    case match.challenger do
-      nil -> "Nobody... yet"
-      ^user_uuid -> "You"
-      _default -> user_uuid
-    end
   end
 end

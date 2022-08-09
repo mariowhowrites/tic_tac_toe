@@ -3,8 +3,8 @@ defmodule TicTacToe.Repo.Migrations.CreateMatches do
 
   def change do
     create table(:matches) do
-      add :creator, :uuid, null: false
-      add :challenger, :uuid
+      add :creator_id, :int
+      add :challenger_id, :int
 
       add :match_state, :map, null: false
 

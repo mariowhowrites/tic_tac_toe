@@ -9,18 +9,18 @@ defmodule TicTacToeWeb.MatchLive.Board do
   end
 
   @impl true
-  def update(%{match: match, user_uuid: user_uuid}, socket) do
+  def update(%{match: match, user: user}, socket) do
     {
       :ok,
       socket
       |> assign(:match, match)
-      |> assign(:user_uuid, user_uuid)
+      |> assign(:user, user)
     }
   end
 
   @impl true
   def handle_event("update_game_value", %{"index" => index}, socket)
-      when socket.assigns.match.creator === socket.assigns.user_uuid do
+      when socket.assigns.match.creator === socket.assigns.user do
     {index, _} = Integer.parse(index)
 
     new_match =
@@ -42,8 +42,11 @@ defmodule TicTacToeWeb.MatchLive.Board do
 
   @impl true
   def handle_event("update_game_value", %{"index" => index}, socket)
-      when socket.assigns.match.challenger === socket.assigns.user_uuid do
+      when socket.assigns.match.challenger === socket.assigns.user do
     {index, _} = Integer.parse(index)
+
+
+    IO.inspect("challenger index")
 
     new_match =
       Multiplayer.update_match_state(
@@ -64,6 +67,8 @@ defmodule TicTacToeWeb.MatchLive.Board do
 
   # when user is neither creator nor challenger
   def handle_event("update_game_value", _args, socket) do
+    IO.inspect("no luck")
+
     {
       :noreply,
       socket

@@ -41,9 +41,11 @@ defmodule TicTacToe.Multiplayer.Engine do
   defp update_state(match, player_to_update, index) do
     cond do
       is_index_filled_already?(match, index) ->
+        IO.inspect "index filled already"
         match.match_state
 
       is_out_of_turn?(match, player_to_update) ->
+        IO.inspect "is out of turn"
         match.match_state
 
       true ->
@@ -62,12 +64,10 @@ defmodule TicTacToe.Multiplayer.Engine do
 
   defp is_out_of_turn?(match, player_to_update) do
     (player_to_update === @creator_symbol and match_status(match) !== :creator_turn)
-    or (player_to_update === @challenger_symbol and match_status(match) !== :challenger_turn)
+    or (player_to_update === @challenger_symbol and match_status(match) not in [:challenger_turn, :accepted])
   end
 
   def match_status(match) do
-    # we need all x values
-    # we need all o values
     creator_squares = match.match_state[@creator_symbol]
     challenger_squares = match.match_state[@challenger_symbol]
 

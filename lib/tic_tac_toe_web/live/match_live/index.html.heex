@@ -24,15 +24,15 @@
             <tbody id="matches" class="divide-y divide-gray-200 bg-white">
               <%= for match <- @matches do %>
                 <tr>
-                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><%= display_name(:creator, match, @user_uuid) %></td>
-                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= display_name(:challenger, match, @user_uuid) %></td>
+                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><%= Multiplayer.display_name(:creator, match, @user) %></td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= Multiplayer.display_name(:challenger, match, @user) %></td>
                   <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= Multiplayer.get_status_text(match) %></td>
                   <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                     <span><%= live_redirect "Show", to: Routes.match_show_path(@socket, :show, match) %></span>
-                    <%= if Multiplayer.is_match_creator?(match, @user_uuid) do %>
+                    <%= if Multiplayer.is_match_creator?(match, @user) do %>
                       <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: match.id, data: [confirm: "Are you sure?"] %></span>
                     <% end %>
-                    <%= if !Multiplayer.is_match_creator?(match, @user_uuid) and Multiplayer.is_match_open?(match) do %>
+                    <%= if !Multiplayer.is_match_creator?(match, @user) and Multiplayer.is_match_open?(match) do %>
                       <span><%= link "Accept", to: "#", phx_click: "accept", phx_value_id: match.id %></span>
                     <% end %>                
                   </td>
