@@ -11,9 +11,9 @@ defmodule TicTacToeWeb.MatchLive.Index do
 
     {
       :ok,
-     socket
-     |> assign(:matches, list_matches())
-     |> assign(:user, Map.get(session, "current_user"))
+      socket
+      |> assign(:matches, list_matches())
+      |> assign(:user, Map.get(session, "current_user"))
     }
   end
 
@@ -27,26 +27,14 @@ defmodule TicTacToeWeb.MatchLive.Index do
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
-    {
-      :noreply,
-      apply_patch(socket, socket.assigns.live_action, params)
-    }
-  end
-
-  defp apply_patch(socket, :new, _params) do
+  def handle_event("new", _params, socket) do
     {:ok, new_match} = Multiplayer.create_match(%{creator: socket.assigns.user})
 
-    push_redirect(
-      socket,
-      to: Routes.match_show_path(socket, :show, new_match)
-    )
-  end
-
-  defp apply_patch(socket, :index, _params) do
-    socket
-    |> assign(:page_title, "Listing Matches")
-    |> assign(:match, nil)
+    {:noreply,
+     push_redirect(
+       socket,
+       to: Routes.match_show_path(socket, :show, new_match)
+     )}
   end
 
   @impl true
@@ -61,10 +49,12 @@ defmodule TicTacToeWeb.MatchLive.Index do
     match = Multiplayer.get_match!(id)
     {:ok, match} = Multiplayer.add_match_challenger(match, socket.assigns.user)
 
-    {:noreply,
+    {
+      :noreply,
       socket
       |> assign(:matches, list_matches())
-      |> push_redirect(to: Routes.match_show_path(socket, :show, match))}
+      |> push_redirect(to: Routes.match_show_path(socket, :show, match))
+    }
   end
 
   defp list_matches do

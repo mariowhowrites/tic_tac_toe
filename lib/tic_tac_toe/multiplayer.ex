@@ -136,10 +136,6 @@ defmodule TicTacToe.Multiplayer do
     |> Repo.update()
 
     Match.broadcast_matches()
-
-    IO.inspect("lol")
-    IO.inspect(match)
-
     Match.broadcast_match(match.id)
 
     {:ok, match}

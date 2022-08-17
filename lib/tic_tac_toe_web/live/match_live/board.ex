@@ -46,8 +46,6 @@ defmodule TicTacToeWeb.MatchLive.Board do
     {index, _} = Integer.parse(index)
 
 
-    IO.inspect("challenger index")
-
     new_match =
       Multiplayer.update_match_state(
         socket.assigns.match,
@@ -67,8 +65,6 @@ defmodule TicTacToeWeb.MatchLive.Board do
 
   # when user is neither creator nor challenger
   def handle_event("update_game_value", _args, socket) do
-    IO.inspect("no luck")
-
     {
       :noreply,
       socket

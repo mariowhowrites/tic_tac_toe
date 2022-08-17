@@ -36,5 +36,4 @@
   user={@user}
 />
 
-<span><%= live_patch "Edit", to: Routes.match_show_path(@socket, :edit, @match), class: "button" %></span> |
 <span><%= live_redirect "Back", to: Routes.match_index_path(@socket, :index) %></span>

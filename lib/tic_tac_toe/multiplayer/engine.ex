@@ -4,20 +4,21 @@ defmodule TicTacToe.Multiplayer.Engine do
 
   @winning_combos [
     # three horizontal
-    [3, 2, 1],
-    [6, 5, 4],
-    [9, 8, 7],
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
 
     # three vertical
-    [7, 4, 1],
-    [9, 6, 3],
-    [8, 5, 2],
+    [1, 4, 7],
+    [3, 6, 9],
+    [2, 5, 8],
 
     # two diagonal
-    [9, 5, 1],
-    [7, 5, 3]
+    [1, 5, 9],
+    [3, 5, 7]
   ]
 
+  @spec new_match_state :: %{optional(<<_::8>>) => []}
   def new_match_state do
     %{
       @creator_symbol => [],
@@ -41,11 +42,9 @@ defmodule TicTacToe.Multiplayer.Engine do
   defp update_state(match, player_to_update, index) do
     cond do
       is_index_filled_already?(match, index) ->
-        IO.inspect "index filled already"
         match.match_state
 
       is_out_of_turn?(match, player_to_update) ->
-        IO.inspect "is out of turn"
         match.match_state
 
       true ->
@@ -98,12 +97,22 @@ defmodule TicTacToe.Multiplayer.Engine do
   end
 
   def is_winning?(squares) do
-    Enum.any?(@winning_combos, fn combo -> Enum.all?(combo, &(&1 in squares)) end)
+    Enum.any?(@winning_combos, fn combo -> is_winning_combo?(combo, squares) end)
   end
 
   def is_draw?(match_state) do
     length(match_state[@creator_symbol]) + length(match_state[@challenger_symbol]) ==
       9
+  end
+
+  def winning_combo(match) do
+    Enum.find(@winning_combos, fn combo ->
+      Enum.any?([match.match_state[@creator_symbol], match.match_state[@challenger_symbol]], fn squares -> is_winning_combo?(combo, squares) end)
+    end)
+  end
+
+  defp is_winning_combo?(winning_combo, squares) do
+    Enum.all?(winning_combo, &(&1 in squares))
   end
 
   def get_value(match, index) do

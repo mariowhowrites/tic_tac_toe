@@ -1,8 +1,9 @@
-<section class="flex justify-center items-center my-12">
-  <div id="board" class="grid grid-rows-3 grid-cols-3">
+<section id="container" class="flex justify-center items-center my-12">
+  <div id="board" class="grid grid-rows-3 grid-cols-3 relative">
     <%= for index <- 1..9 do %>
         <div 
           class="border border-black flex items-center justify-center h-12 w-12 cursor-pointer" 
+          id={"square-#{index}"}
           phx-click="update_game_value"
           phx-value-index={index}
           phx-target={@myself}
