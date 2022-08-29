@@ -41,6 +41,7 @@ defmodule TicTacToe.Accounts do
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
     user = Repo.get_by(User, email: email)
+    IO.inspect {"got user", user}
     if User.valid_password?(user, password), do: user
   end
 
@@ -58,7 +59,8 @@ defmodule TicTacToe.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id),
+    do: Repo.get!(User, id) |> Repo.preload([:creator_matches, :challenger_matches])
 
   ## User registration
 

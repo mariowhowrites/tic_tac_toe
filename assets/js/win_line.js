@@ -11,7 +11,7 @@ function draw_line(first_id, second_id) {
   const board_box = document.getElementById("board")?.getBoundingClientRect();
 
   if (!first_box || !second_box) {
-    console.debug("box does not exist");
+    console.error("box does not exist");
     return;
   }
 
@@ -23,8 +23,9 @@ function draw_line(first_id, second_id) {
   const first_row = Math.ceil(first_id / 3);
   const second_row = Math.ceil(second_id / 3);
 
-  let verticalLine = first_column === second_column;
-  let horizontalLine = first_row === second_row;
+  const verticalLine = first_column === second_column;
+  const horizontalLine = first_row === second_row;
+  const leftToRight = diff > 0;
 
   let startPoint, endPoint;
 
@@ -50,7 +51,7 @@ function draw_line(first_id, second_id) {
       x: second_box.right,
       y
     };
-  } else if (diff > 0) {
+  } else if (leftToRight) {
     // left to right
     startPoint = {
       x: first_box.left,
@@ -91,10 +92,8 @@ function draw_line(first_id, second_id) {
 
   if (verticalLine) {
     classes.push("rotate-90");
-  } else if (diff > 0 && !horizontalLine) {
-    classes.push("rotate-45");
-  } else if (diff < 0 && !horizontalLine) {
-    classes.push("-rotate-45");
+  } else if (!horizontalLine) {
+    classes.push(leftToRight ? "rotate-45" : "-rotate-45");
   }
 
   line.classList.add(...classes);
@@ -104,7 +103,7 @@ function draw_line(first_id, second_id) {
     line.style.top = `${startPoint.y}px`;
     line.style.left = `${startPoint.x}px`;
   } else if (verticalLine) {
-    // why do we need to subtract 2 here?
+    // subtract 2 to account for border (I think?)
     line.style.top = `${(startPoint.y + endPoint.y) / 2 - 2}px`;
     line.style.left = `${first_box.left - first_box.width}px`;
   } else {

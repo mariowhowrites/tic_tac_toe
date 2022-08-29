@@ -2,5 +2,8 @@
   "editor.defaultFormatter": "RoyalMist.vscode-eex-format",
   "[phoenix-heex]": {
     "editor.defaultFormatter": "RoyalMist.vscode-eex-format"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

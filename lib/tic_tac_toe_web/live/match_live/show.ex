@@ -2,6 +2,7 @@ defmodule TicTacToeWeb.MatchLive.Show do
   use TicTacToeWeb, :live_view
 
   alias TicTacToe.Multiplayer
+  alias TicTacToeWeb.Components.MatchHeader
 
   @impl true
   def mount(%{"id" => id}, session, socket) do

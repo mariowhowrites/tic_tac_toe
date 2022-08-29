@@ -15,10 +15,6 @@ defmodule TicTacToe.Multiplayer.Match do
     timestamps()
   end
 
-
-  @doc """
-  Subscribe
-  """
   def subscribe_matches, do: PubSub.subscribe(@pubsub, "matches")
 
   def broadcast_matches do

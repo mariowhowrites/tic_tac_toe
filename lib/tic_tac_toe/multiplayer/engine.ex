@@ -2,6 +2,20 @@ defmodule TicTacToe.Multiplayer.Engine do
   @creator_symbol "O"
   @challenger_symbol "X"
 
+  @doc """
+  All the potential winning combos in a 3x3 game of tic tac toe.
+
+  For now, we can hard-code these, but if we were ever to add support
+  for variable board sizes, we'd probably need some means of automatically deriving these win cons.
+
+  These are then compared against the lists returned by `new_match_state`.
+  If any of the lists in `new_match_state` have all of the squares in any winning combo,
+  the corresponding player wins the game.
+
+  NOTE: for the moment, it is important that these combos go low -> high, (ex. [1, 2, 3] not [3, 2, 1])
+  as the JS algo that draws the winning lines assumes these are low -> high. If the order changes, the JS
+  algo will need to change accordingly.
+  """
   @winning_combos [
     # three horizontal
     [1, 2, 3],
@@ -18,7 +32,6 @@ defmodule TicTacToe.Multiplayer.Engine do
     [3, 5, 7]
   ]
 
-  @spec new_match_state :: %{optional(<<_::8>>) => []}
   def new_match_state do
     %{
       @creator_symbol => [],
@@ -62,8 +75,9 @@ defmodule TicTacToe.Multiplayer.Engine do
   end
 
   defp is_out_of_turn?(match, player_to_update) do
-    (player_to_update === @creator_symbol and match_status(match) !== :creator_turn)
-    or (player_to_update === @challenger_symbol and match_status(match) not in [:challenger_turn, :accepted])
+    (player_to_update === @creator_symbol and match_status(match) !== :creator_turn) or
+      (player_to_update === @challenger_symbol and
+         match_status(match) not in [:challenger_turn, :accepted])
   end
 
   def match_status(match) do
@@ -77,10 +91,10 @@ defmodule TicTacToe.Multiplayer.Engine do
       match.challenger !== nil && length(challenger_squares) === 0 ->
         :accepted
 
-      is_winning?(challenger_squares) ->
+      has_won?(challenger_squares) ->
         :challenger_win
 
-      is_winning?(creator_squares) ->
+      has_won?(creator_squares) ->
         :creator_win
 
       # if we're here, nobody has won yet
@@ -96,8 +110,8 @@ defmodule TicTacToe.Multiplayer.Engine do
     end
   end
 
-  def is_winning?(squares) do
-    Enum.any?(@winning_combos, fn combo -> is_winning_combo?(combo, squares) end)
+  def has_won?(squares) do
+    Enum.any?(@winning_combos, &is_winning_combo?(&1, squares))
   end
 
   def is_draw?(match_state) do
@@ -105,9 +119,18 @@ defmodule TicTacToe.Multiplayer.Engine do
       9
   end
 
+  @doc """
+  If a match has been won, this function returns the combo used to win the match.
+  Otherwise, `nil` is returned instead.
+
+  This is used by the frontend to draw a line through the winning combo.
+  """
   def winning_combo(match) do
     Enum.find(@winning_combos, fn combo ->
-      Enum.any?([match.match_state[@creator_symbol], match.match_state[@challenger_symbol]], fn squares -> is_winning_combo?(combo, squares) end)
+      Enum.any?(
+        [match.match_state[@creator_symbol], match.match_state[@challenger_symbol]],
+        &is_winning_combo?(combo, &1)
+      )
     end)
   end
 
@@ -115,11 +138,17 @@ defmodule TicTacToe.Multiplayer.Engine do
     Enum.all?(winning_combo, &(&1 in squares))
   end
 
+
   def get_value(match, index) do
     cond do
       index in match.match_state[@creator_symbol] -> @creator_symbol
       index in match.match_state[@challenger_symbol] -> @challenger_symbol
       true -> ""
     end
+  end
+
+  def completed_matches(matches) do
+    matches
+    |> Enum.filter(fn match -> match_status(match) in [:challenger_win, :creator_win, :draw] end)
   end
 end

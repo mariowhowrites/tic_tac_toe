@@ -1,7 +1,18 @@
 defmodule TicTacToe.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Phoenix.PubSub
   alias TicTacToe.Multiplayer.Match
+
+  @pubsub TicTacToe.PubSub
+
+  def subscribe_user(user_id) do
+    PubSub.subscribe(@pubsub, "user:#{user_id}")
+  end
+
+  def broadcast_user(user_id) do
+    PubSub.broadcast(@pubsub, "user:#{user_id}", {:user, user_id})
+  end
 
   schema "users" do
     field :email, :string
@@ -10,11 +21,21 @@ defmodule TicTacToe.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
 
-    has_many :matches, Match
+    has_many :creator_matches, Match, foreign_key: :creator_id
+    has_many :challenger_matches, Match, foreign_key: :challenger_id
 
     timestamps()
   end
 
+  @spec registration_changeset(
+          {map, map}
+          | %{
+              :__struct__ => atom | %{:__changeset__ => map, optional(any) => any},
+              optional(atom) => any
+            },
+          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any},
+          keyword
+        ) :: Ecto.Changeset.t()
   @doc """
   A user changeset for registration.
 

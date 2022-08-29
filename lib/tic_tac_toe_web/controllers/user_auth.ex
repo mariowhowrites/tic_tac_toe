@@ -25,6 +25,8 @@ defmodule TicTacToeWeb.UserAuth do
   if you are not using LiveView.
   """
   def log_in_user(conn, user, params \\ %{}) do
+    IO.inspect("logging in...")
+
     token = Accounts.generate_user_session_token(user)
     user_return_to = get_session(conn, :user_return_to)
 

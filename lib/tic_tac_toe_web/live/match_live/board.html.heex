@@ -1,14 +1,14 @@
-<section id="container" class="flex justify-center items-center my-12">
+<section id="container" class="flex justify-center items-center my-12 max-w-4xl mx-auto">
   <div id="board" class="grid grid-rows-3 grid-cols-3 relative">
-    <%= for index <- 1..9 do %>
+    <%= for index <- 1..@total_squares do %>
         <div 
-          class="border border-black flex items-center justify-center h-12 w-12 cursor-pointer" 
+          class={square_classes(index, @total_squares)}
           id={"square-#{index}"}
           phx-click="update_game_value"
           phx-value-index={index}
           phx-target={@myself}
         >
-          <span><%= get_square_value(@match, index) %></span>
+          <span class="text-2xl"><%= get_square_value(@match, index) %></span>
         </div>
     <% end %>
   </div>

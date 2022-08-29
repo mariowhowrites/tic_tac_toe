@@ -5,8 +5,7 @@ defmodule TicTacToe.Multiplayer do
 
   import Ecto.Query, warn: false
   alias TicTacToe.Repo
-  alias TicTacToe.Multiplayer.Match
-  alias TicTacToe.Multiplayer.Engine
+  alias TicTacToe.Multiplayer.{Match,Engine}
 
   @doc """
   Returns the list of matches.
@@ -183,5 +182,21 @@ defmodule TicTacToe.Multiplayer do
       ^user -> "You"
       _default -> match.challenger.email
     end
+  end
+
+  def user_win_rate(user) do
+    total_wins = length(challenger_wins(user)) + length(creator_wins(user))
+
+    total_wins / length(Engine.completed_matches(user.challenger_matches ++ user.creator_matches)) * 100
+  end
+
+  def challenger_wins(user) do
+    user.challenger_matches
+    |> Enum.filter(fn match -> Engine.match_status(match) === :challenger_win end)
+  end
+
+  def creator_wins(user) do
+    user.creator_matches
+    |> Enum.filter(fn match -> Engine.match_status(match) === :creator_win end)
   end
 end
