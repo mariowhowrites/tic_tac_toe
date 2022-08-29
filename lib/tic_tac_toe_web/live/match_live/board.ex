@@ -114,7 +114,7 @@ defmodule TicTacToeWeb.MatchLive.Board do
   end
 
   defp border_bottom_classes(index, max_length) do
-    if index / max_length >= 2 / 3 do
+    if index / max_length > 2 / 3 do
       "border-b-2"
     else
       "border-b"
